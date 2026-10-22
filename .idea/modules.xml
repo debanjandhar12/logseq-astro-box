@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/logseq-anki-sync-dev.iml" filepath="$PROJECT_DIR$/.idea/logseq-anki-sync-dev.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/logseq-astro-box.iml" filepath="$PROJECT_DIR$/.idea/logseq-astro-box.iml" />
     </modules>
   </component>
 </project>

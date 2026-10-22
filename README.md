@@ -1,7 +1,4 @@
-# Logseq AstroBox
-
-[![GitHub stars](https://img.shields.io/github/stars/debanjandhar12/logseq-astro-box?logo=GitHub)](https://github.com/debanjandhar12/logseq-astro-box)
-[![Sponsor](https://img.shields.io/github/sponsors/debanjandhar12?logo=github&label=Sponsor)](https://github.com/sponsors/debanjandhar12)
+# Logseq AstroBox [<img align="right" src="https://img.shields.io/github/stars/debanjandhar12/logseq-astro-box.svg?logo=GitHub&style=flat" height="30"/>](https://github.com/debanjandhar12/logseq-astro-box/)[<img align="right" src="https://img.shields.io/github/sponsors/debanjandhar12.svg?logo=github&style=flat&height=60&label=Donate&cacheSeconds=28800&color=orange" height="30"/>](https://github.com/sponsors/debanjandhar12)
 
 An harness for logseq with superpowers.
 
@@ -37,5 +34,3 @@ Loved the tool? Please consider donating 💸 to help continue development!<br/>
 
 #### Sponsors:
 ![sponsors badge](https://readme-contribs.as93.net/sponsors/debanjandhar12?shape=circle)
-
-[@Tubo](https://github.com/Tubo) [@kieranlal](https://github.com/kieranlal) [@Satoriq](https://github.com/Satoriq) [@ryanbl](https://github.com/rtblair) [@LK0624]() [@Dunrar](https://github.com/Dunrar) [@chs33](https://github.com/chs33) [@Koreanki](https://github.com/junyounglees) [@Rumpoled](https://github.com/Rumpoled) [@Resia1](https://github.com/Resia1) [@thiswillbeyourgithub](https://github.com/thiswillbeyourgithub) [@Speedy5onzales](https://github.com/Speedy5onzales) [@ junyounglees]()
