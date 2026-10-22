@@ -58,6 +58,7 @@ Do not put the query EDN in the visible block content unless the user wants it s
 
 ### Gotchas
 - Avoid simple DSL queries since you cannot test them.
+- The #Query tag block supports both simple DSL and advanced datalog queries. Do not overcomplicate this process.
 - When creating advanced query, the namespace of query property should be logseq.property.
 
 ## Limitations
