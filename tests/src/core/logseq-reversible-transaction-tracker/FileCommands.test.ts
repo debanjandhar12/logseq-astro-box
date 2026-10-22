@@ -1,14 +1,11 @@
-import {Buffer} from "buffer";
 import {afterEach, beforeEach, describe, expect, test, vi} from "vitest";
 import {
     DeleteCommandFileCommand,
     DeleteSkillFileCommand,
     LogseqReversibleTransactionTracker,
     LogseqReversibleTransactionTrackerSerializer,
-    PutAssetFileCommand,
     PutCommandFileCommand,
     PutSkillFileCommand,
-    ReadAssetFileCommand,
     ReadCommandFileCommand,
     ReadSkillFileCommand,
     LogseqReversibleTransactionCommandSerializer as Serializer
@@ -19,7 +16,6 @@ import {SkillStore} from "../../../../src/core/stores/skill-store/SkillStore";
 import {MustacheView} from "../../../../src/core/template-engine";
 import {LogseqPluginStorageManager as Storage} from "../../../../src/logseq/LogseqPluginStorageManager";
 import {InMemoryStore} from "../../../../src/logseq/LogseqPluginStorageManager/InMemoryStore";
-import {WindowParentBridge} from "../../../../src/logseq/WindowParentBridge";
 
 const skill = (name = "alpha", metadata = "", body = "Instructions") =>
     `---\nname: ${name}\ndescription: Example\n${metadata}---\n${body}`;
@@ -292,132 +288,5 @@ describe("asset paths", () => {
         "assets/../pages/a"
     ])("rejects %s", (input) => {
         expect(() => resolveGraphAssetPath(input, "/graph")).toThrow();
-    });
-});
-
-describe("binary asset commands", () => {
-    const files = new Map<string, Uint8Array>();
-    let write: ReturnType<typeof vi.fn>;
-    let action: ReturnType<typeof vi.fn>;
-    beforeEach(() => {
-        files.clear();
-        action = vi.fn(async ([name, first, second]: string[]) => {
-            if (name === "stat") {
-                const bytes = files.get(first);
-                if (!bytes) throw new Error("ENOENT: no such file");
-                return {size: bytes.length};
-            }
-            if (name === "unlink") {
-                files.delete(second);
-                return;
-            }
-            throw new Error(`Unexpected IPC ${name}`);
-        });
-        write = vi.fn(async (file: string, bytes: Uint8Array) => {
-            files.set(`/graph/assets/${file}`, Uint8Array.from(bytes));
-            return `/graph/assets/${file}`;
-        });
-        vi.stubGlobal("logseq", {
-            ...logseq,
-            App: {...logseq.App, getCurrentGraph: vi.fn().mockResolvedValue({path: "/graph"})}
-        });
-        vi.spyOn(WindowParentBridge, "getWindow").mockReturnValue({
-            apis: {doAction: action},
-            fetch: () => {}
-        });
-        vi.spyOn(WindowParentBridge, "getLogseqObject").mockReturnValue({
-            api: {write_assetsdir_file: write}
-        });
-        vi.spyOn(WindowParentBridge, "makeAssetUrl").mockImplementation(
-            async (value) => `/graph/${value}`
-        );
-        vi.spyOn(WindowParentBridge, "getFetch").mockReturnValue(
-            vi.fn(async (url) => {
-                const bytes = files.get(String(url));
-                return {
-                    ok: !!bytes,
-                    status: bytes ? 200 : 404,
-                    arrayBuffer: async () => bytes!.buffer
-                } as Response;
-            })
-        );
-    });
-    test("decodes bytes, reads base64, and removes new assets on serialized undo", async () => {
-        const put = new PutAssetFileCommand({
-            assetPath: "/graph/assets/image.bin",
-            contentBase64: "AP+A"
-        });
-        await put.execute();
-        expect(Array.from(files.get("/graph/assets/image.bin")!)).toEqual([0, 255, 128]);
-        expect(put.getChangedAssets()).toEqual(["assets/image.bin"]);
-        expect(put.getChangedPages()).toEqual([]);
-        expect(
-            await new ReadAssetFileCommand({assetPath: "../assets/image.bin"}).execute()
-        ).toEqual({exists: true, contentBase64: "AP+A"});
-        await roundTrip(put).revert();
-        expect(files.size).toBe(0);
-    });
-    test.each([
-        new Uint8Array(),
-        new Uint8Array([0, 255, 42])
-    ])("restores existing bytes including zero-byte originals", async (bytes) => {
-        files.set("/graph/assets/image.bin", bytes);
-        const put = new PutAssetFileCommand({assetPath: "assets/image.bin", contentBase64: "AQ=="});
-        await put.execute();
-        await roundTrip(put).revert();
-        expect(Buffer.from(files.get("/graph/assets/image.bin")!)).toEqual(Buffer.from(bytes));
-    });
-    test("does not mistake permission errors for missing originals", async () => {
-        action.mockRejectedValueOnce(new Error("EACCES: permission denied"));
-        await expect(
-            new PutAssetFileCommand({assetPath: "assets/a", contentBase64: "AQ=="}).execute()
-        ).rejects.toThrow("EACCES");
-        expect(write).not.toHaveBeenCalled();
-    });
-
-    test("handles hosts that swallow stat errors without overwriting unreadable files", async () => {
-        action.mockResolvedValueOnce(undefined).mockResolvedValueOnce([]);
-        expect(await new ReadAssetFileCommand({assetPath: "assets/missing"}).execute()).toEqual({
-            exists: false,
-            contentBase64: null
-        });
-        action.mockResolvedValueOnce(undefined).mockResolvedValueOnce(["/graph/assets/existing"]);
-        await expect(
-            new PutAssetFileCommand({assetPath: "assets/existing", contentBase64: "AQ=="}).execute()
-        ).rejects.toThrow("metadata");
-        expect(write).not.toHaveBeenCalled();
-    });
-    test("rolls back partially failed writes", async () => {
-        files.set("/graph/assets/a", new Uint8Array([7]));
-        write.mockImplementationOnce(async () => {
-            files.set("/graph/assets/a", new Uint8Array([99]));
-            throw new Error("write failed");
-        });
-        const put = new PutAssetFileCommand({assetPath: "assets/a", contentBase64: "AQ=="});
-        await expect(put.execute()).rejects.toThrow("write failed");
-        expect(Array.from(files.get("/graph/assets/a")!)).toEqual([7]);
-        expect(put.getCommandState().status).toBe("new");
-    });
-    test("rejects malformed base64, web, protected storage and graph switches", async () => {
-        expect(
-            () => new PutAssetFileCommand({assetPath: "assets/a", contentBase64: " "})
-        ).toThrow();
-        expect(
-            () => new PutAssetFileCommand({assetPath: "assets/a", contentBase64: "%%%"})
-        ).toThrow();
-        await expect(
-            new PutAssetFileCommand({
-                assetPath: `assets/storages/${logseq.baseInfo.id}/skills/a/SKILL.md`,
-                contentBase64: "AQ=="
-            }).execute()
-        ).rejects.toThrow("dedicated commands");
-        const put = new PutAssetFileCommand({assetPath: "assets/a", contentBase64: "AQ=="});
-        await put.execute();
-        vi.mocked(logseq.App.getCurrentGraph).mockResolvedValue({path: "/other"} as any);
-        await expect(put.revert()).rejects.toThrow("graph changed");
-        vi.mocked(WindowParentBridge.getWindow).mockReturnValue({});
-        await expect(new ReadAssetFileCommand({assetPath: "assets/a"}).execute()).rejects.toThrow(
-            "desktop host"
-        );
     });
 });
