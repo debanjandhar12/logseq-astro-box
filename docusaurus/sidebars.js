@@ -3,13 +3,13 @@ const sidebars = {
         "intro",
         {
             type: "category",
-            label: "Providers",
-            items: ["providers/provider-configurations"],
+            label: "Basic",
+            items: ["basic/skills-configuration", "basic/commands-configuration"],
         },
         {
             type: "category",
-            label: "Chat",
-            items: ["chat/skills", "chat/commands", "chat/bash-sandbox"],
+            label: "Advanced",
+            items: ["advanced/sandboxed-environment"],
         },
     ],
 };

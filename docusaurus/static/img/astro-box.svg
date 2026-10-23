@@ -1,7 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
-  <title id="title">Logseq AstroBox</title>
-  <rect x="4" y="4" width="56" height="56" rx="14" fill="#172554"/>
-  <path d="m16 27 16-8 16 8v19l-16 8-16-8Z" fill="#60a5fa"/>
-  <path d="m16 27 16 8 16-8M32 35v19" fill="none" stroke="#172554" stroke-width="3" stroke-linejoin="round"/>
-  <path d="m45 8 2.5 5.5L53 16l-5.5 2.5L45 24l-2.5-5.5L37 16l5.5-2.5Z" fill="#fbbf24"/>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="32"
+  height="32"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  class="icon icon-tabler icons-tabler-outline icon-tabler-robot-face"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M6 5h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
+  <path d="M9 16c1 .667 2 1 3 1s2 -.333 3 -1" />
+  <path d="M9 7l-1 -4" />
+  <path d="M15 7l1 -4" />
+  <path d="M9 12v-1" />
+  <path d="M15 12v-1" />
 </svg>

@@ -168,10 +168,14 @@ table img {
 
 /* Navbar logo sizing */
 .navbar__logo img {
-  height: 28px;
+  height: 32px;
   padding-top: 2px;
   margin-right: 0;
   width: auto;
+}
+
+html[data-theme='dark'] .navbar__logo img {
+  filter: invert(1);
 }
 
 /* Hide logo on mobile and tablet */
