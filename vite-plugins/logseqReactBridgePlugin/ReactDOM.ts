@@ -2,9 +2,7 @@ import type * as ReactDOMTypes from "react-dom";
 import * as OriginalReactDOM from "react-dom";
 import type * as ReactDOMClientTypes from "react-dom/client";
 import * as OriginalReactDOMClient from "react-dom/client";
-import "@logseq/libs";
-import {LogseqAppInfoFetcher} from "../../src/logseq/LogseqAppInfoFetcher";
-
+import {getHostReact} from "./hostReact";
 
 type CombinedReactDOM = typeof ReactDOMTypes & {
     createRoot: typeof ReactDOMClientTypes.createRoot;
@@ -12,11 +10,13 @@ type CombinedReactDOM = typeof ReactDOMTypes & {
 };
 
 function getReactDOMInstance(): CombinedReactDOM {
-    if (process.env.NODE_ENV === "production" &&
-        LogseqAppInfoFetcher.checkHostAccess() &&
-        typeof logseq !== "undefined" &&
-        logseq?.Experiments?.ReactDOM?.["createRoot"]) {
-        return logseq.Experiments.ReactDOM as CombinedReactDOM;
+    const hostReactDOM = getHostReact()?.ReactDOM as CombinedReactDOM | undefined;
+    if (hostReactDOM) {
+        return {
+            ...hostReactDOM,
+            createRoot: hostReactDOM.createRoot ?? OriginalReactDOMClient.createRoot,
+            hydrateRoot: hostReactDOM.hydrateRoot ?? OriginalReactDOMClient.hydrateRoot
+        };
     }
     return {
         ...OriginalReactDOM,

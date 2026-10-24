@@ -1,16 +1,9 @@
 import type * as ReactTypes from "react";
 import * as OriginalReact from "react";
-import "@logseq/libs";
-import {LogseqAppInfoFetcher} from "../../src/logseq/LogseqAppInfoFetcher";
+import {getHostReact} from "./hostReact";
 
 function getReactInstance(): typeof ReactTypes {
-    if (process.env.NODE_ENV === "production" &&
-        LogseqAppInfoFetcher.checkHostAccess() &&
-        typeof logseq !== "undefined" &&
-        logseq?.Experiments?.React) {
-        return logseq.Experiments.React as typeof ReactTypes;
-    }
-    return OriginalReact;
+    return (getHostReact()?.React as typeof ReactTypes | undefined) ?? OriginalReact;
 }
 
 const React = getReactInstance();

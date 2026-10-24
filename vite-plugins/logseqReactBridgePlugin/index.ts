@@ -5,7 +5,9 @@ import path from "node:path";
  * Plugin to ensure all React imports use the same instance.
  *
  * This plugin redirects react imports to React.ts / ReactDOM.ts / ReactJsxRuntime.ts.
- * Those files, in turn, attempt to use logseq's React if available in production mode.
+ * Those files select a compatible Logseq React/ReactDOM pair in production only.
+ * Missing host client root APIs use the bundled renderer when React versions match.
+ * Development and incompatible hosts use the bundled pair.
  */
 export function logseqReactBridgePlugin(): Plugin {
     const reactWrapperPath = path.resolve(import.meta.dirname, "./React.ts");
