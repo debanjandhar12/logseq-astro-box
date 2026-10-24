@@ -43,14 +43,17 @@ describe("initBuiltInSkillFiles", () => {
         );
     });
 
-    test("installs six matching folders with exact query examples, rules, and debugging reference", async () => {
+    test("installs seven matching folders with exact query examples, rules, and debugging reference", async () => {
         await initBuiltInSkillFiles();
         const skills = await SkillStore.getAllSkills();
-        expect(skills).toHaveLength(6);
+        expect(skills).toHaveLength(7);
         for (const skill of skills) {
             expect(parseSkillFile(skill.content).name).toBe(skill.folderName);
             expect(skill.builtInSkill).toBe(true);
         }
+        const ankiSkill = await SkillStore.getSkill("anki-flashcards");
+        expect(ankiSkill?.disableModelInvocation).toBe(true);
+        expect(ankiSkill?.builtInSkillUserControllable).toBe(true);
         const paths = await Storage.getFiles("skills");
         expect(paths.filter((path) => !path.endsWith("/SKILL.md")).sort()).toEqual(
             [
@@ -120,7 +123,7 @@ describe("initBuiltInSkillFiles", () => {
             query: "?raw",
             import: "default"
         });
-        expect(Object.keys(sources)).toHaveLength(6);
+        expect(Object.keys(sources)).toHaveLength(7);
         for (const [path, content] of Object.entries(sources)) {
             expect(parseSkillFile(content as string).name).toBe(path.split("/").at(-2));
         }
@@ -148,7 +151,7 @@ describe("initBuiltInSkillFiles", () => {
             "SKILL.md",
             "examples/BILIBILI_TRANSCRIPT.py"
         ]);
-        expect(await SkillStore.getAllSkills()).toHaveLength(6);
+        expect(await SkillStore.getAllSkills()).toHaveLength(7);
     });
 
     test.each(["user-owned", "malformed"])("preserves a %s renamed destination", async (kind) => {

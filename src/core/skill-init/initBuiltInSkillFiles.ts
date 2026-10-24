@@ -3,6 +3,7 @@ import QUERY_PAGE_MEMBERSHIP_RAW from "src/chat-app/prompts/skills/logseq-datasc
 import QUERY_PROPERTY_REVERSE_LOOKUP_RAW from "src/chat-app/prompts/skills/logseq-datascript-queries/examples/PROPERTY_REVERSE_LOOKUP.ds?raw";
 import QUERY_RECURSIVE_CLASS_INHERITANCE_RAW from "src/chat-app/prompts/skills/logseq-datascript-queries/examples/RECURSIVE_CLASS_INHERITANCE.ds?raw";
 import QUERY_STATUS_HISTORY_RAW from "src/chat-app/prompts/skills/logseq-datascript-queries/examples/STATUS_HISTORY.ds?raw";
+import SKILL_ANKI_FLASHCARDS_RAW from "../../chat-app/prompts/skills/anki-flashcards/SKILL.md?inlineSkill";
 import REFERENCE_LOGSEQ_DATASCRIPT_QUERY_PITFALLS_RAW from "../../chat-app/prompts/skills/logseq-datascript-queries/references/query-pitfalls.md?inlineSkill";
 import SKILL_LOGSEQ_DATASCRIPT_QUERIES_RAW from "../../chat-app/prompts/skills/logseq-datascript-queries/SKILL.md?inlineSkill";
 import SKILL_LOGSEQ_PROPERTIES_AND_TAGS_RAW from "../../chat-app/prompts/skills/logseq-properties-and-tags/SKILL.md?inlineSkill";
@@ -34,6 +35,7 @@ const BUILT_IN_SKILLS: BundledSkill[] = [
         examples: {"BILIBILI_TRANSCRIPT.py": BILIBILI_TRANSCRIPT_RAW}
     },
     ...[
+        SKILL_ANKI_FLASHCARDS_RAW,
         SKILL_LOGSEQ_TOOLS_GUIDE_RAW,
         SKILL_LOGSEQ_PROPERTIES_AND_TAGS_RAW,
         SKILL_LOGSEQ_VIDEO_AND_WEB_EMBEDS_RAW,
