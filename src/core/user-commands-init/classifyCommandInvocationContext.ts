@@ -22,7 +22,7 @@ export async function classifyBlockCommandInvocationContext(
 
     return {
         source: "block-context-menu",
-        location: await classifyBlockLocation(block),
+        locations: await classifyBlockLocations(block),
         uuid
     };
 }
@@ -35,18 +35,23 @@ export async function classifyPageCommandInvocationContext(
 
     return {
         source: "page-context-menu",
-        location: await classifyPageLocation(page),
+        locations: [await classifyPageLocation(page)],
         uuid: page.uuid
     };
 }
 
-async function classifyBlockLocation(block: BlockEntity): Promise<BlockContextMenuInvokeLocation> {
-    if (LogseqEditor.isImageAssetBlock(block)) return "Block Context Menu/Image";
-    if (LogseqEditor.isPdfAssetBlock(block)) return "Block Context Menu/Pdf";
-    if (isVideoBlock(block)) return "Block Context Menu/Video";
-    if (await isFlashcardBlock(block)) return "Block Context Menu/Flashcard";
-    if (await isMathBlock(block)) return "Block Context Menu/Math";
-    return "Block Context Menu/Other Blocks";
+async function classifyBlockLocations(
+    block: BlockEntity
+): Promise<BlockContextMenuInvokeLocation[]> {
+    const locations: BlockContextMenuInvokeLocation[] = [];
+    if (LogseqEditor.isImageAssetBlock(block)) locations.push("Block Context Menu/Image");
+    else if (LogseqEditor.isPdfAssetBlock(block)) locations.push("Block Context Menu/Pdf");
+    else if (isVideoBlock(block)) locations.push("Block Context Menu/Video");
+    else if (await isMathBlock(block)) locations.push("Block Context Menu/Math");
+
+    if (await isFlashcardBlock(block)) locations.push("Block Context Menu/Flashcard");
+    if (locations.length === 0) locations.push("Block Context Menu/Other Blocks");
+    return locations;
 }
 
 async function classifyPageLocation(page: PageEntity): Promise<PageContextMenuInvokeLocation> {

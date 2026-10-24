@@ -60,20 +60,20 @@ describe("classifyBlockCommandInvocationContext", () => {
         vi.mocked(isMathBlock).mockResolvedValue(true);
 
         await expect(classifyBlockCommandInvocationContext("block-uuid")).resolves.toMatchObject({
-            location: "Block Context Menu/Math",
+            locations: ["Block Context Menu/Math"],
             uuid: "block-uuid"
         });
     });
 
-    test("keeps flashcard precedence over math", async () => {
+    test("classifies a math flashcard as both Math and Flashcard", async () => {
         stubBlock(blockWith("$x^2$"));
         vi.mocked(isFlashcardBlock).mockResolvedValue(true);
         vi.mocked(isMathBlock).mockResolvedValue(true);
 
         await expect(classifyBlockCommandInvocationContext("block-uuid")).resolves.toMatchObject({
-            location: "Block Context Menu/Flashcard"
+            locations: ["Block Context Menu/Math", "Block Context Menu/Flashcard"]
         });
-        expect(isMathBlock).not.toHaveBeenCalled();
+        expect(isMathBlock).toHaveBeenCalledOnce();
     });
 
     test("keeps video precedence over math", async () => {
@@ -81,7 +81,7 @@ describe("classifyBlockCommandInvocationContext", () => {
         vi.mocked(isMathBlock).mockResolvedValue(true);
 
         await expect(classifyBlockCommandInvocationContext("block-uuid")).resolves.toMatchObject({
-            location: "Block Context Menu/Video"
+            locations: ["Block Context Menu/Video"]
         });
         expect(isMathBlock).not.toHaveBeenCalled();
     });
@@ -95,16 +95,68 @@ describe("classifyBlockCommandInvocationContext", () => {
         vi.mocked(isMathBlock).mockResolvedValue(true);
 
         await expect(classifyBlockCommandInvocationContext("block-uuid")).resolves.toMatchObject({
-            location
+            locations: [location]
         });
         expect(isMathBlock).not.toHaveBeenCalled();
+    });
+
+    test.each([
+        ["Image", "isImageAssetBlock", "Block Context Menu/Image"],
+        ["Pdf", "isPdfAssetBlock", "Block Context Menu/Pdf"]
+    ] as const)("classifies a %s flashcard in both categories", async (_name, method, location) => {
+        stubBlock(blockWith("$x^2$"));
+        vi.spyOn(LogseqEditor, method).mockReturnValue(true);
+        vi.mocked(isFlashcardBlock).mockResolvedValue(true);
+        vi.mocked(isMathBlock).mockResolvedValue(true);
+
+        await expect(classifyBlockCommandInvocationContext("block-uuid")).resolves.toMatchObject({
+            locations: [location, "Block Context Menu/Flashcard"]
+        });
+        expect(isMathBlock).not.toHaveBeenCalled();
+    });
+
+    test("classifies a video flashcard in both categories without also matching Math", async () => {
+        stubBlock(blockWith("{{video https://example.com/video}}"));
+        vi.mocked(isFlashcardBlock).mockResolvedValue(true);
+        vi.mocked(isMathBlock).mockResolvedValue(true);
+
+        await expect(classifyBlockCommandInvocationContext("block-uuid")).resolves.toMatchObject({
+            locations: ["Block Context Menu/Video", "Block Context Menu/Flashcard"]
+        });
+        expect(isMathBlock).not.toHaveBeenCalled();
+    });
+
+    test("does not add Other Blocks to a flashcard without another category", async () => {
+        stubBlock(blockWith("{{cloze answer}}"));
+        vi.mocked(isFlashcardBlock).mockResolvedValue(true);
+
+        await expect(classifyBlockCommandInvocationContext("block-uuid")).resolves.toMatchObject({
+            locations: ["Block Context Menu/Flashcard"]
+        });
+    });
+
+    test("keeps blocks containing embedded image links in Other Blocks", async () => {
+        stubBlock(blockWith("![image](../assets/image.png)"));
+
+        await expect(classifyBlockCommandInvocationContext("block-uuid")).resolves.toMatchObject({
+            locations: ["Block Context Menu/Other Blocks"]
+        });
+    });
+
+    test("rejects missing blocks", async () => {
+        stubBlock(blockWith("plain text"));
+        vi.mocked(logseq.Editor.getBlock).mockResolvedValue(null);
+
+        await expect(classifyBlockCommandInvocationContext("missing")).rejects.toThrow(
+            "Block not found: missing"
+        );
     });
 
     test("leaves ordinary blocks in Other Blocks", async () => {
         stubBlock(blockWith("plain text"));
 
         await expect(classifyBlockCommandInvocationContext("block-uuid")).resolves.toMatchObject({
-            location: "Block Context Menu/Other Blocks"
+            locations: ["Block Context Menu/Other Blocks"]
         });
     });
 
@@ -131,7 +183,7 @@ describe("classifyPageCommandInvocationContext", () => {
         vi.spyOn(LogseqEditor, "isPropertyBlock").mockResolvedValue(false);
 
         await expect(classifyPageCommandInvocationContext("Page")).resolves.toMatchObject({
-            location: "Page Context Menu/Other Pages",
+            locations: ["Page Context Menu/Other Pages"],
             uuid: PAGE_UUID
         });
         expect(isMathBlock).not.toHaveBeenCalled();

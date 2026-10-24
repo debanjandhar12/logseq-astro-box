@@ -9,25 +9,25 @@ export type PageContextMenuInvokeLocation = (typeof PAGE_CONTEXT_MENU_INVOKE_LOC
 
 export interface BlockCommandInvocationContext {
     source: "block-context-menu";
-    location: BlockContextMenuInvokeLocation;
+    locations: BlockContextMenuInvokeLocation[];
     uuid: string;
 }
 
 export interface PageCommandInvocationContext {
     source: "page-context-menu";
-    location: PageContextMenuInvokeLocation;
+    locations: [PageContextMenuInvokeLocation];
     uuid: string;
 }
 
 export interface SlashCommandInvocationContext {
     source: "block-slash-command";
-    location: "Block Slash Command";
+    locations: ["Block Slash Command"];
     uuid: string;
 }
 
 export interface CommandCenterInvocationContext {
     source: "command-center";
-    location: "Logseq Command Center";
+    locations: ["Logseq Command Center"];
 }
 
 /** Invocation contexts that are routed through the plugin's own command palette. */

@@ -1,5 +1,6 @@
 import {CommandFileStore} from "../stores/command-file-store/CommandFileStore";
 import type {CommandFileData} from "../stores/command-file-store/types";
+import {commandMatchesInvocationContext} from "./commandMatchesInvocationContext";
 import {ADD_AS_ATTACHMENT_COMMAND_NAME} from "./constants";
 import type {CommandInvocationContext} from "./types";
 
@@ -14,6 +15,6 @@ export async function getEligibleCommandFiles(
 ): Promise<CommandFileData[]> {
     return (await CommandFileStore.getAllCommandFiles())
         .filter((commandFile) => commandFile.userInvocable)
-        .filter((commandFile) => commandFile.invokeLocations.includes(context.location))
+        .filter((commandFile) => commandMatchesInvocationContext(commandFile, context))
         .sort(compareCommandFiles);
 }

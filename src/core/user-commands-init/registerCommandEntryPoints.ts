@@ -6,6 +6,7 @@ import {
     classifyBlockCommandInvocationContext,
     classifyPageCommandInvocationContext
 } from "./classifyCommandInvocationContext";
+import {commandMatchesInvocationContext} from "./commandMatchesInvocationContext";
 import {createUserCommand} from "./createUserCommand";
 import {getEligibleCommandFiles} from "./getEligibleCommandFiles";
 import type {
@@ -27,13 +28,13 @@ export async function registerUserCommandEntryPoints(): Promise<void> {
 
     const commandCenterContext: CommandCenterInvocationContext = {
         source: "command-center",
-        location: "Logseq Command Center"
+        locations: ["Logseq Command Center"]
     };
     await registerCommandCenterCommands(commandCenterContext);
 
     const slashRegistrationContext: SlashCommandInvocationContext = {
         source: "block-slash-command",
-        location: "Block Slash Command",
+        locations: ["Block Slash Command"],
         uuid: ""
     };
     await registerSlashCommands(slashRegistrationContext);
@@ -108,7 +109,7 @@ async function registerSlashCommands(context: SlashCommandInvocationContext): Pr
                 await executeNativeUserCommand(
                     createUserCommand(commandFile, {
                         source: "block-slash-command",
-                        location: "Block Slash Command",
+                        locations: ["Block Slash Command"],
                         uuid
                     })
                 );
@@ -126,7 +127,7 @@ async function executeContextMenuCommand(
     try {
         const context = await classify();
         if (directCommandFile) {
-            if (!directCommandFile.invokeLocations.includes(context.location)) {
+            if (!commandMatchesInvocationContext(directCommandFile, context)) {
                 await logseq.UI.showMsg(
                     `"${directCommandFile.name}" is not available here.`,
                     "warning"

@@ -6,6 +6,7 @@ import {CommandFileStore} from "../../../../src/core/stores/command-file-store/C
 import type {CommandFileData} from "../../../../src/core/stores/command-file-store/types";
 import {getEligibleCommandFiles} from "../../../../src/core/user-commands-init";
 import {createUserCommand} from "../../../../src/core/user-commands-init/createUserCommand";
+import type {BlockCommandInvocationContext} from "../../../../src/core/user-commands-init/types";
 
 function commandFile(overrides: Partial<CommandFileData> = {}): CommandFileData {
     return {
@@ -20,9 +21,9 @@ function commandFile(overrides: Partial<CommandFileData> = {}): CommandFileData 
     };
 }
 
-const context = {
-    source: "block-context-menu" as const,
-    location: "Block Context Menu/Other Blocks" as const,
+const context: BlockCommandInvocationContext = {
+    source: "block-context-menu",
+    locations: ["Block Context Menu/Other Blocks"],
     uuid: "block-uuid"
 };
 
@@ -142,11 +143,35 @@ describe("getEligibleCommandFiles", () => {
 
         const commands = await getEligibleCommandFiles({
             source: "block-context-menu",
-            location: "Block Context Menu/Math",
+            locations: ["Block Context Menu/Math"],
             uuid: "block-uuid"
         });
 
         expect(commands.map(({name}) => name)).toEqual(["Add as attachment", "Evaluate Math"]);
+    });
+
+    test("matches either flashcard category without duplicating commands", async () => {
+        vi.spyOn(CommandFileStore, "getAllCommandFiles").mockResolvedValue([
+            commandFile({name: "Flashcard", invokeLocations: ["Block Context Menu/Flashcard"]}),
+            commandFile({name: "Math", invokeLocations: ["Block Context Menu/Math"]}),
+            commandFile({
+                name: "Both",
+                invokeLocations: ["Block Context Menu/Math", "Block Context Menu/Flashcard"]
+            }),
+            commandFile({name: "Other Blocks only"}),
+            commandFile({
+                name: "Disabled",
+                invokeLocations: ["Block Context Menu/Flashcard"],
+                userInvocable: false
+            })
+        ]);
+
+        const commands = await getEligibleCommandFiles({
+            ...context,
+            locations: ["Block Context Menu/Math", "Block Context Menu/Flashcard"]
+        });
+
+        expect(commands.map(({name}) => name)).toEqual(["Both", "Flashcard", "Math"]);
     });
 
     test("does not enqueue anything when template rendering fails", async () => {
