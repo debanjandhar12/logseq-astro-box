@@ -32,5 +32,8 @@ Loved the tool? Please consider donating 💸 to help continue development!<br/>
 <a href="https://github.com/sponsors/debanjandhar12" target="_blank"><img src="https://img.shields.io/github/sponsors/debanjandhar12.svg?logo=github&style=flat&height=60&label=Donate&cacheSeconds=28800&color=orange" alt="Sponsors" height="50" style="border-radius:1px" />
 </p>
 
-#### Sponsors:
+#### Github Sponsors:
 ![sponsors badge](https://readme-contribs.as93.net/sponsors/debanjandhar12?shape=circle)
+
+#### AI Sponsors:
+<a href="https://kilo.ai"><img src="https://avatars.githubusercontent.com/u/201822503?s=200&v=4" alt="kilo badge" width="48" height="48" /></a>
